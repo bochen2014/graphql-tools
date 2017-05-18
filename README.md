@@ -1,11 +1,13 @@
 # publish a npm package
 ## login to npm via `npm adduser`
 >if username exists, login; otherwise signup
+```
 $ npm adduser --registry=https://registry.npmjs.org
 Username: bochen2014
 Password: Op*\*do\*0*
 Email: (this IS public) bochen2014@yahoo.com
 Logged in as bochen2014 on https://registry.npmjs.org/.
+```
 ## make sure you have `prepublish` defined
 
  ```
