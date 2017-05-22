@@ -4,14 +4,12 @@
   "editor.rulers": [100],
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
-  "editor.wrappingColumn": 100,
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
     "node_modules": true,
     "test-lib": true,
     "lib": true,
-    "dist": true,
     "coverage": true,
     "npm": true
   },
