@@ -298,8 +298,7 @@ function addResolveFunctionsToSchema(schema: GraphQLSchema, resolveFunctions: IR
 
     Object.keys(resolveFunctions[typeName]).forEach((fieldName) => {
       if (fieldName.startsWith('__')) {
-        // this is for isTypeOf and resolveType and all the other stuff.
-        // TODO require resolveType for unions and interfaces.
+        //NOTE:  only required by interface types and union types
         type[fieldName.substring(2)] = resolveFunctions[typeName][fieldName];
         return;
       }
