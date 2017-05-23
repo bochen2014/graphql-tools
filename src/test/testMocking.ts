@@ -402,6 +402,35 @@ describe('Mock', () => {
     });
   });
 
+ it.only('must return typename inside an interface mock', () => {
+    const jsSchema = buildSchemaFromTypeDefinitions(shorthand);
+    addResolveFunctionsToSchema(jsSchema, resolveFunctions);
+    const mockMap = {
+      Bird: (root: any, args: any) => ({
+        id: args.id,
+        returnInt: 100,
+      }),
+      Bee: (root: any, args: any) => ({
+        id: args.id,
+        returnInt: 100,
+      }),
+      Flying: (root: any, args: any): void => {
+        return;
+      }
+    };
+    addMockFunctionsToSchema({ schema: jsSchema, mocks: mockMap });
+    const testQuery = `{
+      node(id:"bee:123456"){
+        id,
+        returnInt
+      }
+    }`;
+    const expected = 'Please return a typename in "Flying"';
+    return graphql(jsSchema, testQuery).then((res) => {
+      expect((<any>res.errors[0]).originalError.message).to.equal(expected);
+    });
+  });
+
   it('resolvetype function is called after resolve() . what we need is called id-fetcher', () => {
     // node_modules\graphql\execution\execute.js  line:460
     // resolve () will return a returnType and result;
