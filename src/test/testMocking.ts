@@ -321,7 +321,7 @@ describe('Mock', () => {
     });
   });
 
-  it('can mock Interfaces', () => {
+  it.only('can mock Interfaces', () => {
     const jsSchema = buildSchemaFromTypeDefinitions(shorthand);
     addResolveFunctionsToSchema(jsSchema, resolveFunctions);
     const mockMap = {
