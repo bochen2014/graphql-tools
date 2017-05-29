@@ -1,3 +1,28 @@
+```
+D:\graphql-tools\node_modules\graphql\execution\execute.js line:426
+function resolveField(exeContext, parentType, source, fieldNodes, path) {
+
+
+
+   var result = resolveOrError(exeContext, fieldDef, fieldNode, resolveFn, source, context, info);  //resolve
+
+   return completeValueCatchingError(exeContext, returnType, fieldNodes, info, path, result); // __resolveType
+
+}
+
+
+
+function completeValue(exeContext, returnType, fieldNodes, info, path, result) {
+
+D:\graphql-tools\node_modules\graphql\execution\execute.js line:595
+  // If field type is an abstract type, Interface or Union, determine the
+  // runtime Object type and complete for that type.
+  if ((0, _definition.isAbstractType)(returnType)) {
+    return completeAbstractValue(exeContext, returnType, fieldNodes, info, path, result);  //only for interfaceTypes and unionTypes
+  }
+}
+```
+
 # publish a npm package
 ## login to npm via `npm adduser`
 >if username exists, login; otherwise signup
