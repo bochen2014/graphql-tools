@@ -65,6 +65,7 @@ describe('Mock', () => {
       returnListOfListOfObject: [[Bird!]]!
       returnStringArgument(s: String): String
       node(id:String!):Flying
+      node2(id:String!):BirdsAndBees
     }
 
     type RootMutation{
@@ -375,7 +376,7 @@ describe('Mock', () => {
       }),
       Bee: (root: any, args: any) => ({
         id: args.id,
-        returnInt: 100,
+        returnInt: 200,
       }),
       Flying: (root: any, args: any) => {
         spy++;
@@ -396,7 +397,46 @@ describe('Mock', () => {
       expect(spy).to.equal(1);
       expect(res.data['node']).to.include({
         id: 'bee:123456',
-        returnInt: 100
+        returnInt: 200
+      });
+    });
+  });
+
+  it('can support node id-fetcher with unionType', () => {
+    const jsSchema = buildSchemaFromTypeDefinitions(shorthand);
+    addResolveFunctionsToSchema(jsSchema, resolveFunctions);
+    let spy = 0;
+    const mockMap = {
+      Bird: (root: any, args: any) => ({
+        id: args.id,
+        returnInt: 100,
+      }),
+      Bee: (root: any, args: any) => ({
+        id: args.id,
+        returnEnum: 'A'
+      }),
+      BirdsAndBees: (root: any, args: any) => {
+        spy++;
+        const { id } = args;
+        const type = id.split(':')[0];
+        return { __typename: ['Bird', 'Bee'].find(r => r.toLowerCase() === type) };
+      }
+    };
+    addMockFunctionsToSchema({ schema: jsSchema, mocks: mockMap, preserveResolvers: true });
+    const testQuery = `{
+      node2(id:"bee:123456"){
+        ...on Bee{
+          id,
+          returnEnum
+        }
+      }
+    }`;
+
+    return graphql(jsSchema, testQuery).then(res => {
+      expect(spy).to.equal(1);
+      expect(res.data['node2']).to.include({
+        id: 'bee:123456',
+        returnEnum: 'A'
       });
     });
   });
