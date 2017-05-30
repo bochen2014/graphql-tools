@@ -7,10 +7,8 @@
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
-    "node_modules": true,
     "test-lib": true,
     "lib": true,
-    "coverage": true,
     "npm": true
   },
   "typescript.tsdk": "node_modules/typescript/lib"

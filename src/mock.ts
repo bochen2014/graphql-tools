@@ -17,7 +17,7 @@ import { graphql } from 'graphql';
 import * as uuid from 'uuid';
 import { forEachField, buildSchemaFromTypeDefinitions } from './schemaGenerator';
 
-import { IMocks, IMockServer, IMockOptions , IMockFn , IMockTypeFn , ITypeDefinitions } from './Interfaces';
+import { IMocks, IMockServer, IMockOptions, IMockFn, IMockTypeFn, ITypeDefinitions } from './Interfaces';
 
 // This function wraps addMockFunctionsToSchema for more convenience
 function mockServer(schema: GraphQLSchema | ITypeDefinitions, mocks: IMocks, preserveResolvers: boolean = false): IMockServer {
@@ -115,11 +115,11 @@ function addMockFunctionsToSchema({ schema, mocks = {}, preserveResolvers = fals
   }
 
   function getResolveType(namedFieldType: GraphQLNamedType) {
-    if ( (namedFieldType instanceof GraphQLInterfaceType) ||
-         (namedFieldType instanceof GraphQLUnionType) ) {
-        return namedFieldType.resolveType;
+    if ((namedFieldType instanceof GraphQLInterfaceType) ||
+      (namedFieldType instanceof GraphQLUnionType)) {
+      return namedFieldType.resolveType;
     } else {
-        return undefined;
+      return undefined;
     }
   }
 
@@ -133,7 +133,7 @@ function addMockFunctionsToSchema({ schema, mocks = {}, preserveResolvers = fals
     }
 
     if (namedFieldType instanceof GraphQLUnionType ||
-        namedFieldType instanceof GraphQLInterfaceType) {
+      namedFieldType instanceof GraphQLInterfaceType) {
       // the default `resolveType` always returns null. We add a fallback
       // resolution that works with how unions and interface are mocked
       namedFieldType.resolveType = (data: any, context: any, info: GraphQLResolveInfo) => {
@@ -180,9 +180,10 @@ function addMockFunctionsToSchema({ schema, mocks = {}, preserveResolvers = fals
 
       if (fieldType instanceof GraphQLList) {
         return [mockType(fieldType.ofType)(root, args, context, info),
-                mockType(fieldType.ofType)(root, args, context, info)];
+        mockType(fieldType.ofType)(root, args, context, info)];
       }
-      if (mockFunctionMap.has(fieldType.name)  && !(fieldType instanceof GraphQLInterfaceType)) {
+      if (mockFunctionMap.has(fieldType.name) && !(fieldType instanceof GraphQLUnionType ||
+        fieldType instanceof GraphQLInterfaceType)) {
         // the object passed doesn't have this field, so we apply the default mock
         return mockFunctionMap.get(fieldType.name)(root, args, context, info);
       }
@@ -190,21 +191,13 @@ function addMockFunctionsToSchema({ schema, mocks = {}, preserveResolvers = fals
         // objects don't return actual data, we only need to mock scalars!
         return {};
       }
-
-      // TODO mocking Interface and Union types will require determining the
-      // resolve type before passing it on.
-      // XXX we recommend a generic way for resolve type here, which is defining
-      // typename on the object.
-      if (fieldType instanceof GraphQLUnionType) {
-        const randomType = getRandomElement(fieldType.getTypes());
-        return Object.assign({ __typename: randomType }, mockType(randomType)(root, args, context, info));
-      }
-      if (fieldType instanceof GraphQLInterfaceType) {
+      // if a mock function is provided for a unionType or interfaceType, execute it to resolve __typename
+      // otherwise,randomly pick a type from all implementation types
+      if (fieldType instanceof GraphQLUnionType || fieldType instanceof GraphQLInterfaceType) {
         let implementationType;
         if (mockFunctionMap.has(fieldType.name)) {
           const interfaceMockObj = mockFunctionMap.get(fieldType.name)(root, args, context, info);
           if (!interfaceMockObj || !interfaceMockObj.__typename) {
-            // http://dev.apollodata.com/tools/graphql-tools/mocking.html
             return Error(`Please return a __typename in "${fieldType.name}"`);
           }
           implementationType = schema.getType(interfaceMockObj.__typename);
@@ -246,9 +239,9 @@ function addMockFunctionsToSchema({ schema, mocks = {}, preserveResolvers = fals
         if (rootMock(undefined, {}, {}, {} as any)[fieldName]) {
           // TODO: assert that it's a function
           mockResolver = (root: any,
-                          args: { [key: string]: any },
-                          context: any,
-                          info: GraphQLResolveInfo) => {
+            args: { [key: string]: any },
+            context: any,
+            info: GraphQLResolveInfo) => {
             const updatedRoot = root || {}; // TODO: should we clone instead?
             updatedRoot[fieldName] = rootMock(root, args, context, info)[fieldName];
             // XXX this is a bit of a hack to still use mockType, which
@@ -277,11 +270,11 @@ function addMockFunctionsToSchema({ schema, mocks = {}, preserveResolvers = fals
 
         // In case we couldn't mock
         if (mockedValue instanceof Error) {
-            // only if value was not resolved, populate the error.
-            if (undefined === resolvedValue) {
-              throw mockedValue;
-            }
-            return resolvedValue;
+          // only if value was not resolved, populate the error.
+          if (undefined === resolvedValue) {
+            throw mockedValue;
+          }
+          return resolvedValue;
         }
 
         if (isObject(mockedValue) && isObject(resolvedValue)) {
@@ -311,11 +304,11 @@ class MockList {
   }
 
   public mock(root: any,
-              args: { [key: string]: any },
-              context: any,
-              info: GraphQLResolveInfo,
-              fieldType: GraphQLList<any>,
-              mockTypeFunc: IMockTypeFn) {
+    args: { [key: string]: any },
+    context: any,
+    info: GraphQLResolveInfo,
+    fieldType: GraphQLList<any>,
+    mockTypeFunc: IMockTypeFn) {
     let arr: any[];
     if (Array.isArray(this.len)) {
       arr = new Array(this.randint(this.len[0], this.len[1]));
@@ -340,7 +333,7 @@ class MockList {
   }
 
   private randint(low: number, high: number): number {
-      return Math.floor((Math.random() * ((high - low) + 1)) + low);
+    return Math.floor((Math.random() * ((high - low) + 1)) + low);
   }
 }
 
